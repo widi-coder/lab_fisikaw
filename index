@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Quantum Lab - The Complete Periodic Table</title>
+<style>
+/* =========================================
+   STYLE GLOBAL & TRANSISI
+   ========================================= */
+:root{
+  --bg: #050505;
+  --panel: #0f172a;
+  --border: #334155;
+  --text-main: #e2e8f0;
+  --text-dim: #94a3b8;
+  --accent: #06b6d4;
+  --st-ok: #10b981;
+  --st-warn: #f59e0b;
+  --st-err: #ef4444;
+}
+
+body{
+  margin:0; font-family:'Segoe UI',Roboto,Helvetica,sans-serif;
+  background: radial-gradient(circle at 50% -20%, #1e293b 0%, var(--bg) 80%);
+  color: var(--text-main); min-height: 100vh;
+  overflow: hidden; 
+}
+
+/* =========================================
+   INTRO SCREEN (LAMPU)
+   ========================================= */
+#intro-screen {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: #1a1a1a; z-index: 9999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: opacity 1s ease;
+}
+.lamp-container { position: relative; width: 200px; height: 350px; display: flex; flex-direction: column; align-items: center; }
+.shade {
+  position: relative; z-index: 2; width: 180px; height: 140px; background: #444; 
+  border-radius: 20px 20px 10px 10px; transform: perspective(200px) rotateX(5deg);
+  transition: all 0.3s ease; box-shadow: inset 0 -10px 20px rgba(0,0,0,0.5);
+  display: flex; justify-content: center; align-items: center;
+}
+.face { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100px; height: 40px; display: flex; justify-content: space-between; align-items: center; }
+.eye { width: 25px; height: 15px; border-bottom: 3px solid #111; border-radius: 50%; transition: all 0.3s; }
+.mouth { position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); width: 10px; height: 5px; background: transparent; border-radius: 50%; transition: all 0.3s; opacity: 0; }
+.stand { width: 15px; height: 120px; background: #333; margin-top: -10px; z-index: 1; }
+.base { width: 100px; height: 20px; background: #333; border-radius: 50%; margin-top: -5px; box-shadow: 0 5px 10px rgba(0,0,0,0.5); }
+.cord-wrap { position: absolute; top: 130px; left: 40px; z-index: 0; }
+.cord { width: 2px; height: 100px; background: #888; margin: 0 auto; transition: height 0.1s; }
+.knob { width: 12px; height: 25px; background: #aaa; border-radius: 10px; margin-left: -5px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.5); transition: transform 0.1s; }
+.knob:hover { background: #fff; }
+.active .shade { background: #facc15; box-shadow: 0 0 80px rgba(250, 204, 21, 0.6), inset 0 -10px 20px rgba(255, 165, 0, 0.5); }
+.active .eye { border-bottom: none; background: #333; width: 12px; height: 12px; border-radius: 50%; transform: translateY(-5px); }
+.active .mouth { opacity: 1; width: 30px; height: 15px; border-bottom: 3px solid #333; border-radius: 50%; }
+.instruction { margin-top: 50px; color: #666; font-size: 14px; letter-spacing: 1px; font-family: monospace; animation: blink 2s infinite; }
+@keyframes blink { 50% { opacity: 0.3; } }
+.flash-bang { position: fixed; top:0; left:0; width:100%; height:100%; background: white; opacity: 0; pointer-events: none; transition: opacity 1.5s ease-out; z-index: 10000; }
+.flashing { opacity: 1 !important; transition: opacity 0.1s ease-in !important; }
+
+/* =========================================
+   MAIN APP STYLE
+   ========================================= */
+.container{max-width:1200px; margin:0 auto; padding:20px; opacity: 0; transition: opacity 1.5s ease;}
+.container.visible { opacity: 1; }
+.header{ display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border); padding-bottom:15px; margin-bottom:25px; }
+.header h1{ margin:0; font-weight:800; letter-spacing:-1px; background: linear-gradient(to right, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.main-grid{ display: grid; grid-template-columns: 350px 1fr; gap: 25px; }
+@media(max-width:900px){ .main-grid{grid-template-columns: 1fr;} }
+.card{ background: rgba(15,23,42,0.7); border: 1px solid var(--border); border-radius: 12px; padding: 20px; backdrop-filter: blur(10px); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+.search-group { margin-bottom: 20px; }
+.search-box { width: 100%; padding: 12px; background: #020617; border: 1px solid var(--border); color: white; border-radius: 8px; font-size: 14px; outline: none; }
+.config-display { font-family: 'Courier New', monospace; font-size: 13px; color: var(--accent); margin-top: 8px; background: rgba(6, 182, 212, 0.1); padding: 8px; border-radius: 6px; border: 1px dashed var(--accent); }
+.control-group { margin-bottom: 20px; }
+.ctl-header { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-dim); margin-bottom: 8px; }
+.ctl-val { font-family: 'Consolas', monospace; color: var(--accent); font-weight: bold; }
+input[type=range]{ width: 100%; -webkit-appearance: none; background: transparent; cursor: pointer; }
+input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: #334155; border-radius: 3px; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: white; margin-top: -6px; box-shadow: 0 0 10px white; }
+.spectrum { height: 6px; width: 100%; border-radius: 3px; margin: 8px 0; opacity: 0.8; background: linear-gradient(90deg, #500 0%, #f00 13%, #ff0 25%, #0f0 38%, #0ff 50%, #00f 63%, #f0f 75%, #409 100%); }
+.metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+.metric-item { background: #020617; border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; }
+.metric-label { font-size: 10px; text-transform: uppercase; color: var(--text-dim); letter-spacing: 1px; }
+.metric-val { font-size: 16px; font-weight: bold; color: white; margin-top: 4px; }
+.tutor-panel { margin-top: 20px; padding: 15px; border-radius: 10px; background: #0f172a; border-left: 4px solid var(--border); transition: all 0.3s ease; min-height: 120px; }
+.tutor-head { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.tutor-text { font-size: 14px; line-height: 1.6; color: var(--text-main); }
+.hl { font-weight: 700; color: white; background: rgba(255,255,255,0.1); padding: 0 4px; border-radius: 4px; }
+.hl-err { color: var(--st-err); }
+.hl-ok { color: var(--st-ok); }
+.canvas-wrap { position: relative; height: 420px; width: 100%; background: #000; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+.table-container { margin-top: 20px; max-height: 250px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { position: sticky; top: 0; background: #0f172a; color: var(--text-dim); padding: 12px; text-align: left; }
+td { padding: 8px 12px; border-bottom: 1px solid #1e293b; cursor: pointer; }
+tr:hover { background: rgba(255,255,255,0.05); }
+</style>
+</head>
+<body>
+
+<div id="flash" class="flash-bang"></div>
+
+<div id="intro-screen">
+  <div class="lamp-container" id="lamp">
+    <div class="shade"><div class="face"><div class="eye left"></div><div class="eye right"></div><div class="mouth"></div></div></div>
+    <div class="cord-wrap"><div class="cord" id="cordLine"></div><div class="knob" id="cordKnob" onclick="toggleLamp()"></div></div>
+    <div class="stand"></div><div class="base"></div>
+  </div>
+  <div class="instruction">KLIK TALI UNTUK MENYALAKAN</div>
+</div>
+
+<div class="container" id="mainApp">
+  <div class="header">
+    <div>
+      <h1>Quantum Lab <span style="font-size:0.5em; vertical-align:middle; border:1px solid var(--accent); color:var(--accent); padding:2px 6px; border-radius:4px;">COMPLETE</span></h1>
+      <div style="font-size:14px; color:var(--text-dim)">Database Tabel Periodik Lengkap (88 Material)</div>
+    </div>
+    <div style="text-align:right">
+      <button onclick="reset()" style="background:var(--border); color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">Reset</button>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div class="card">
+      <div class="search-group">
+        <label class="ctl-header">CARI MATERIAL (Ketik Nama/Simbol)</label>
+        <input list="materials" id="search" class="search-box" placeholder="Cth: Emas, Au, Besi...">
+        <datalist id="materials"></datalist>
+        <div class="config-display" id="configDisp">Konfigurasi: -</div>
+      </div>
+      <div class="control-group">
+        <div class="ctl-header"><span>Frekuensi Cahaya (f)</span><span class="ctl-val"><span id="vF">550</span> THz</span></div>
+        <div class="spectrum"></div>
+        <input id="rF" type="range" min="200" max="1800" step="10" value="550">
+        <div id="colName" style="text-align:center; font-size:12px; font-weight:bold; margin-top:4px;">Hijau</div>
+      </div>
+      <div class="control-group">
+        <div class="ctl-header"><span>Fungsi Kerja Logam (Φ)</span><span class="ctl-val"><span id="vPhi">2.30</span> eV</span></div>
+        <input id="rPhi" type="range" min="1.8" max="6.5" step="0.01" value="2.30">
+      </div>
+      <div class="control-group">
+        <div class="ctl-header"><span>Intensitas Cahaya</span><span class="ctl-val" id="vI">60%</span></div>
+        <input id="rI" type="range" min="0" max="1" step="0.01" value="0.60">
+      </div>
+      <div class="metrics">
+        <div class="metric-item"><div class="metric-label">Energi Foton</div><div class="metric-val" id="mEph">0.00 eV</div></div>
+        <div class="metric-item"><div class="metric-label">Energi Kinetik</div><div class="metric-val" id="mK">0.00 eV</div></div>
+        <div class="metric-item"><div class="metric-label">Potensial Henti</div><div class="metric-val" id="mVs" style="color:#ff0055">0.00 V</div></div>
+      </div>
+      <button id="btnSweep" style="width:100%; margin-top:20px; padding:12px; background:var(--accent); color:black; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">▶ Auto Sweep Tegangan</button>
+    </div>
+
+    <div>
+      <div class="card" style="padding:0; border:none; overflow:hidden;">
+        <div class="canvas-wrap">
+          <canvas id="cv" width="800" height="420"></canvas>
+          <div style="position:absolute; bottom:10px; right:15px; font-size:12px; color:var(--text-dim); text-align:right;">Sumbu X: Tegangan (V) &nbsp;|&nbsp; Sumbu Y: Arus (I)</div>
+        </div>
+      </div>
+      <div id="tutorBox" class="tutor-panel">
+        <div class="tutor-head" id="tutorHead"><span>🤖</span> STATUS: MENUNGGU</div>
+        <div class="tutor-text" id="tutorMsg">Database memuat 80+ unsur. Silakan pilih material untuk memulai.</div>
+      </div>
+      <div class="table-container">
+        <table id="matTable"><thead><tr><th>Material</th><th>Simbol</th><th>Elektron</th><th>Fungsi Kerja (Φ)</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- INTRO ---
+function toggleLamp() {
+  const lamp = $('lamp'), cord = $('cordLine'), knob = $('cordKnob'), flash = $('flash'), intro = $('intro-screen'), main = $('mainApp');
+  cord.style.height='120px'; knob.style.transform='translateY(20px)';
+  setTimeout(() => {
+    cord.style.height='100px'; knob.style.transform='translateY(0)';
+    lamp.classList.add('active'); 
+    setTimeout(() => {
+      flash.classList.add('flashing'); 
+      setTimeout(() => {
+        intro.style.display='none'; document.body.style.overflow='auto'; 
+        flash.classList.remove('flashing'); main.classList.add('visible'); 
+      }, 500); 
+    }, 300); 
+  }, 150);
+}
+
+// --- DATABASE LENGKAP (88 Unsur) ---
+const DB = [
+  // --- ALKALI METALS (Group 1) ---
+  {n:"Cesium",    s:"Cs", p:2.14, c:"Alkali", ec:"[Xe] 6s¹"},
+  {n:"Rubidium",  s:"Rb", p:2.26, c:"Alkali", ec:"[Kr] 5s¹"},
+  {n:"Kalium",    s:"K",  p:2.29, c:"Alkali", ec:"[Ar] 4s¹"},
+  {n:"Natrium",   s:"Na", p:2.36, c:"Alkali", ec:"[Ne] 3s¹"},
+  {n:"Lithium",   s:"Li", p:2.50, c:"Alkali", ec:"[He] 2s¹"},
+
+  // --- ALKALINE EARTH METALS (Group 2) ---
+  {n:"Barium",    s:"Ba", p:2.52, c:"Alkali Tanah", ec:"[Xe] 6s²"},
+  {n:"Stronsium", s:"Sr", p:2.59, c:"Alkali Tanah", ec:"[Kr] 5s²"},
+  {n:"Kalsium",   s:"Ca", p:2.87, c:"Alkali Tanah", ec:"[Ar] 4s²"},
+  {n:"Magnesium", s:"Mg", p:3.66, c:"Alkali Tanah", ec:"[Ne] 3s²"},
+  {n:"Berilium",  s:"Be", p:4.98, c:"Alkali Tanah", ec:"[He] 2s²"},
+
+  // --- TRANSITION METALS (Period 4) ---
+  {n:"Scandium",  s:"Sc", p:3.50, c:"Transisi", ec:"[Ar] 3d¹ 4s²"},
+  {n:"Titanium",  s:"Ti", p:4.33, c:"Transisi", ec:"[Ar] 3d² 4s²"},
+  {n:"Vanadium",  s:"V",  p:4.30, c:"Transisi", ec:"[Ar] 3d³ 4s²"},
+  {n:"Kromium",   s:"Cr", p:4.50, c:"Transisi", ec:"[Ar] 3d⁵ 4s¹"},
+  {n:"Mangan",    s:"Mn", p:4.10, c:"Transisi", ec:"[Ar] 3d⁵ 4s²"},
+  {n:"Besi",      s:"Fe", p:4.67, c:"Transisi", ec:"[Ar] 3d⁶ 4s²"},
+  {n:"Kobalt",    s:"Co", p:5.00, c:"Transisi", ec:"[Ar] 3d⁷ 4s²"},
+  {n:"Nikel",     s:"Ni", p:5.15, c:"Transisi", ec:"[Ar] 3d⁸ 4s²"},
+  {n:"Tembaga",   s:"Cu", p:4.65, c:"Transisi", ec:"[Ar] 3d¹⁰ 4s¹"},
+  {n:"Seng",      s:"Zn", p:4.33, c:"Transisi", ec:"[Ar] 3d¹⁰ 4s²"},
+
+  // --- TRANSITION METALS (Period 5) ---
+  {n:"Yttrium",   s:"Y",  p:3.10, c:"Transisi", ec:"[Kr] 4d¹ 5s²"},
+  {n:"Zirkonium", s:"Zr", p:4.05, c:"Transisi", ec:"[Kr] 4d² 5s²"},
+  {n:"Niobium",   s:"Nb", p:4.30, c:"Transisi", ec:"[Kr] 4d⁴ 5s¹"},
+  {n:"Molybdenum",s:"Mo", p:4.60, c:"Transisi", ec:"[Kr] 4d⁵ 5s¹"},
+  {n:"Ruthenium", s:"Ru", p:4.71, c:"Transisi", ec:"[Kr] 4d⁷ 5s¹"},
+  {n:"Rhodium",   s:"Rh", p:4.98, c:"Transisi", ec:"[Kr] 4d⁸ 5s¹"},
+  {n:"Palladium", s:"Pd", p:5.12, c:"Transisi", ec:"[Kr] 4d¹⁰"},
+  {n:"Perak",     s:"Ag", p:4.26, c:"Transisi", ec:"[Kr] 4d¹⁰ 5s¹"},
+  {n:"Kadmium",   s:"Cd", p:4.08, c:"Transisi", ec:"[Kr] 4d¹⁰ 5s²"},
+
+  // --- TRANSITION METALS (Period 6) ---
+  {n:"Hafnium",   s:"Hf", p:3.90, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d² 6s²"},
+  {n:"Tantalum",  s:"Ta", p:4.25, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d³ 6s²"},
+  {n:"Tungsten",  s:"W",  p:4.55, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d⁴ 6s²"},
+  {n:"Rhenium",   s:"Re", p:4.96, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d⁵ 6s²"},
+  {n:"Osmium",    s:"Os", p:5.93, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d⁶ 6s²"},
+  {n:"Iridium",   s:"Ir", p:5.27, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d⁷ 6s²"},
+  {n:"Platinum",  s:"Pt", p:6.35, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d⁹ 6s¹"},
+  {n:"Emas",      s:"Au", p:5.10, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d¹⁰ 6s¹"},
+  {n:"Raksa",     s:"Hg", p:4.49, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d¹⁰ 6s²"},
+
+  // --- POST-TRANSITION METALS ---
+  {n:"Aluminium", s:"Al", p:4.08, c:"Post-Trans", ec:"[Ne] 3s² 3p¹"},
+  {n:"Gallium",   s:"Ga", p:4.20, c:"Post-Trans", ec:"[Ar] 3d¹⁰ 4s² 4p¹"},
+  {n:"Indium",    s:"In", p:4.12, c:"Post-Trans", ec:"[Kr] 4d¹⁰ 5s² 5p¹"},
+  {n:"Timah",     s:"Sn", p:4.42, c:"Post-Trans", ec:"[Kr] 4d¹⁰ 5s² 5p²"},
+  {n:"Thallium",  s:"Tl", p:3.84, c:"Post-Trans", ec:"[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p¹"},
+  {n:"Timbal",    s:"Pb", p:4.25, c:"Post-Trans", ec:"[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²"},
+  {n:"Bismuth",   s:"Bi", p:4.22, c:"Post-Trans", ec:"[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p³"},
+  {n:"Polonium",  s:"Po", p:4.61, c:"Post-Trans", ec:"[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁴"},
+
+  // --- METALLOIDS ---
+  {n:"Boron",     s:"B",  p:4.45, c:"Metaloid", ec:"[He] 2s² 2p¹"},
+  {n:"Silikon",   s:"Si", p:4.85, c:"Metaloid", ec:"[Ne] 3s² 3p²"},
+  {n:"Germanium", s:"Ge", p:5.00, c:"Metaloid", ec:"[Ar] 3d¹⁰ 4s² 4p²"},
+  {n:"Arsenik",   s:"As", p:3.75, c:"Metaloid", ec:"[Ar] 3d¹⁰ 4s² 4p³"},
+  {n:"Antimon",   s:"Sb", p:4.55, c:"Metaloid", ec:"[Kr] 4d¹⁰ 5s² 5p³"},
+  {n:"Tellurium", s:"Te", p:4.95, c:"Metaloid", ec:"[Kr] 4d¹⁰ 5s² 5p⁴"},
+
+  // --- NON-METALS (Solid) ---
+  {n:"Karbon",    s:"C",  p:5.00, c:"Non-Logam", ec:"[He] 2s² 2p²"},
+  {n:"Fosfor",    s:"P",  p:4.42, c:"Non-Logam", ec:"[Ne] 3s² 3p³"},
+  {n:"Sulfur",    s:"S",  p:4.78, c:"Non-Logam", ec:"[Ne] 3s² 3p⁴"},
+  {n:"Selenium",  s:"Se", p:5.90, c:"Non-Logam", ec:"[Ar] 3d¹⁰ 4s² 4p⁴"},
+  {n:"Yodium",    s:"I",  p:5.40, c:"Halogen",   ec:"[Kr] 4d¹⁰ 5s² 5p⁵"},
+
+  // --- LANTHANIDES (Rare Earth Elements) ---
+  {n:"Lanthanum", s:"La", p:3.50, c:"Lantanida", ec:"[Xe] 5d¹ 6s²"},
+  {n:"Cerium",    s:"Ce", p:2.90, c:"Lantanida", ec:"[Xe] 4f¹ 5d¹ 6s²"},
+  {n:"Praseodim", s:"Pr", p:2.70, c:"Lantanida", ec:"[Xe] 4f³ 6s²"},
+  {n:"Neodimium", s:"Nd", p:3.20, c:"Lantanida", ec:"[Xe] 4f⁴ 6s²"},
+  {n:"Promethium",s:"Pm", p:3.05, c:"Lantanida", ec:"[Xe] 4f⁵ 6s²"},
+  {n:"Samarium",  s:"Sm", p:2.70, c:"Lantanida", ec:"[Xe] 4f⁶ 6s²"},
+  {n:"Europium",  s:"Eu", p:2.50, c:"Lantanida", ec:"[Xe] 4f⁷ 6s²"},
+  {n:"Gadolinium",s:"Gd", p:3.10, c:"Lantanida", ec:"[Xe] 4f⁷ 5d¹ 6s²"},
+  {n:"Terbium",   s:"Tb", p:3.00, c:"Lantanida", ec:"[Xe] 4f⁹ 6s²"},
+  {n:"Dysprosium",s:"Dy", p:3.08, c:"Lantanida", ec:"[Xe] 4f¹⁰ 6s²"},
+  {n:"Holmium",   s:"Ho", p:3.15, c:"Lantanida", ec:"[Xe] 4f¹¹ 6s²"},
+  {n:"Erbium",    s:"Er", p:3.10, c:"Lantanida", ec:"[Xe] 4f¹² 6s²"},
+  {n:"Thulium",   s:"Tm", p:3.08, c:"Lantanida", ec:"[Xe] 4f¹³ 6s²"},
+  {n:"Ytterbium", s:"Yb", p:2.60, c:"Lantanida", ec:"[Xe] 4f¹⁴ 6s²"},
+  {n:"Lutetium",  s:"Lu", p:3.30, c:"Lantanida", ec:"[Xe] 4f¹⁴ 5d¹ 6s²"},
+
+  // --- ACTINIDES (Radioactive Solids) ---
+  {n:"Thorium",   s:"Th", p:3.40, c:"Aktinida", ec:"[Rn] 6d² 7s²"},
+  {n:"Uranium",   s:"U",  p:3.60, c:"Aktinida", ec:"[Rn] 5f³ 6d¹ 7s²"},
+  {n:"Plutonium", s:"Pu", p:3.40, c:"Aktinida", ec:"[Rn] 5f⁶ 7s²"}
+];
+
+const $ = id => document.getElementById(id);
+const ctx = $('cv').getContext('2d');
+const h = 4.1357e-15; 
+let state = { phi: 2.36, f: 550, I: 0.60, V: -3, matName: "Natrium", ec: "[Ne] 3s¹", sweep: false };
+
+function init(){
+  DB.sort((a,b) => a.p - b.p); // Urutkan berdasarkan phi
+  DB.forEach(m => {
+    let opt = document.createElement('option'); opt.value = m.n; $('materials').appendChild(opt);
+    let tr = document.createElement('tr');
+    tr.innerHTML = `<td style="font-weight:bold; color:white">${m.n}</td>
+                    <td style="color:var(--accent)">${m.s}</td>
+                    <td style="font-family:monospace; font-size:11px; color:#fff">${m.ec}</td>
+                    <td style="font-family:monospace">${m.p.toFixed(2)} eV</td>`;
+    tr.onclick = () => loadMaterial(m);
+    $('matTable').querySelector('tbody').appendChild(tr);
+  });
+  loadMaterial(DB.find(x => x.n === "Natrium")); // Load default
+}
+
+function calculatePhysics() {
+  const fHz = state.f * 1e12; const Eph = h * fHz; const Kmax = Eph - state.phi;
+  return { Eph, Kmax, Vs: Math.max(0, Kmax), emission: Kmax > 0 };
+}
+
+function getCurrent(v, phys) {
+  if (!phys.emission) return 0;
+  const Isat = state.I + 0.02;
+  if (v < -phys.Vs) return 0;
+  if (v > 0) return Isat;
+  return Isat * (1 - Math.exp( -2 * (v + phys.Vs) ));
+}
+
+function getLightProps(f) {
+  let r=0, g=0, b=0, name="";
+  if(f<400){r=100;name="Inframerah";}else if(f<480){r=255;name="Merah";}else if(f<510){r=255;g=140;name="Jingga";}
+  else if(f<540){r=255;g=255;name="Kuning";}else if(f<600){g=255;name="Hijau";}else if(f<670){g=220;b=255;name="Biru Muda";}
+  else if(f<750){r=50;g=50;b=255;name="Biru";}else if(f<790){r=160;b=240;name="Ungu";}else{r=140;b=210;name="Ultraviolet";}
+  return { color: rgb(${r},${g},${b}), name };
+}
+
+function updateTutor(phys, light) {
+  const box = $('tutorBox'), head = $('tutorHead'), msg = $('tutorMsg');
+  if (!phys.emission) {
+    box.style.borderLeftColor = "var(--st-err)"; head.innerHTML = <span style="color:var(--st-err)">🛑 GAGAL LEPAS</span>;
+    msg.innerHTML = Logam <b>${state.matName}</b> (${state.ec}) mengikat elektron kuat sekali (<span class="hl">${state.phi.toFixed(2)} eV</span>).<br>Energi foton <b>${light.name}</b> cuma <span class="hl hl-err">${phys.Eph.toFixed(2)} eV</span>. Kurang kuat!;
+    return;
+  }
+  if (state.V < -phys.Vs) {
+    box.style.borderLeftColor = "var(--st-warn)"; head.innerHTML = <span style="color:var(--st-warn)">⚠ TERTOLAK TEGANGAN</span>;
+    msg.innerHTML = Elektron berhasil lepas dari kulit terluar <b>${state.ec}</b>! <br>Tapi baterai melawan dengan <b>${state.V.toFixed(2)} V</b>, jadi arus berhenti.;
+  } else {
+    box.style.borderLeftColor = "var(--st-ok)"; head.innerHTML = <span style="color:var(--st-ok)">✅ ARUS MENGALIR</span>;
+    msg.innerHTML = Sukses! Elektron valensi <b>${state.ec}</b> terlepas. <br>Energi Kinetik sisa: <span class="hl hl-ok">${phys.Kmax.toFixed(2)} eV</span>.;
+  }
+}
+
+function draw() {
+  const w = $('cv').width, hC = $('cv').height, pad = 60;
+  const phys = calculatePhysics(), light = getLightProps(state.f);
+  
+  $('mEph').innerText = phys.Eph.toFixed(2) + " eV"; $('mK').innerText = (phys.Kmax>0?phys.Kmax:0).toFixed(2)+" eV";
+  $('mVs').innerText = phys.Vs.toFixed(2) + " V"; $('colName').innerText = light.name; $('colName').style.color = light.color;
+  $('vI').innerText = Math.round(state.I * 100) + "%";
+  
+  // Update Config Display
+  $('configDisp').innerHTML = Konfigurasi: <b>${state.ec}</b>;
+
+  updateTutor(phys, light);
+
+  ctx.fillStyle = "#050505"; ctx.fillRect(0,0,w,hC);
+  
+  // Grid
+  ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 1; ctx.beginPath();
+  for(let v=-3;v<=3;v++){let x=map(v,-3,3,pad,w-pad); ctx.moveTo(x,pad); ctx.lineTo(x,hC-pad);}
+  for(let i=0;i<=1.2;i+=0.2){let y=map(i,0,1.2,hC-pad,pad); ctx.moveTo(pad,y); ctx.lineTo(w-pad,y);}
+  ctx.stroke();
+
+  // Axis
+  ctx.strokeStyle="#475569"; ctx.lineWidth=2; ctx.beginPath();
+  ctx.moveTo(pad,hC-pad); ctx.lineTo(w-pad,hC-pad); 
+  let x0=map(0,-3,3,pad,w-pad); ctx.moveTo(x0,pad); ctx.lineTo(x0,hC-pad); ctx.stroke();
+  
+  // Text
+  ctx.fillStyle="#94a3b8"; ctx.font="12px sans-serif";
+  ctx.fillText("-3V",pad,hC-pad+20); ctx.fillText("+3V",w-pad-20,hC-pad+20); ctx.fillText("0V",x0-8,hC-pad+20);
+
+  // Curve
+  ctx.save(); ctx.strokeStyle=light.color; ctx.lineWidth=4; ctx.lineCap="round"; ctx.lineJoin="round";
+  ctx.shadowColor=light.color; ctx.shadowBlur=(state.I*20)+5; 
+  ctx.beginPath(); let first=true;
+  for(let px=0;px<=w-2*pad;px+=4){
+    let vVal=-3+(px/(w-2*pad))*6; let iVal=getCurrent(vVal,phys);
+    let x=map(vVal,-3,3,pad,w-pad); let y=map(iVal,0,1.2,hC-pad,pad);
+    if(first){ctx.moveTo(x,y);first=false;}else ctx.lineTo(x,y);
+  }
+  ctx.stroke(); ctx.restore();
+
+  // Stop Line (V_stop)
+  if(phys.emission){
+    let xStop=map(-phys.Vs,-3,3,pad,w-pad);
+    ctx.save();
+    ctx.strokeStyle="#ff0055"; ctx.shadowColor="#ff0055"; ctx.shadowBlur=15;
+    ctx.setLineDash([5,5]); ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(xStop,pad); ctx.lineTo(xStop,hC-pad); ctx.stroke(); 
+    ctx.restore();
+    ctx.fillStyle="#ff0055"; ctx.font="bold 12px sans-serif"; ctx.fillText(Vs,xStop+5,pad+15);
+  }
+
+  // Dot
+  let curI=getCurrent(state.V,phys);
+  let dx=map(state.V,-3,3,pad,w-pad); let dy=map(curI,0,1.2,hC-pad,pad);
+  ctx.fillStyle="white"; ctx.beginPath(); ctx.arc(dx,dy,7,0,Math.PI*2); ctx.fill(); 
+  ctx.strokeStyle="black"; ctx.lineWidth=2; ctx.stroke();
+}
+
+function map(v,i1,i2,o1,o2){return o1+(o2-o1)*((v-i1)/(i2-i1));}
+function loadMaterial(m){
+  state.phi=m.p; state.matName=m.n; state.ec=m.ec; 
+  $('rPhi').value=m.p; $('search').value=m.n; $('vPhi').innerText=m.p.toFixed(2); 
+  draw();
+}
+function reset(){
+  let def = DB.find(x=>x.n==="Natrium");
+  loadMaterial(def);
+  state.f=550; state.I=0.6; state.V=-3; state.sweep=false; 
+  $('rF').value=550; $('vF').innerText=550; $('rI').value=0.6; 
+  draw();
+}
+
+$('rF').oninput=e=>{state.f=+e.target.value; $('vF').innerText=state.f; draw();};
+$('rPhi').oninput=e=>{state.phi=+e.target.value; state.matName="Custom"; state.ec="???"; $('vPhi').innerText=state.phi.toFixed(2); draw();};
+$('rI').oninput=e=>{state.I=+e.target.value; draw();};
+$('search').oninput=e=>{let v=e.target.value.toLowerCase(); let f=DB.find(x=>x.n.toLowerCase()===v||x.s.toLowerCase()===v); if(f)loadMaterial(f);};
+$('cv').onmousemove=e=>{if(e.buttons===1){let r=$('cv').getBoundingClientRect(); let v=map(e.clientX-r.left,60,$('cv').width-60,-3,3); state.V=Math.max(-3,Math.min(3,v)); state.sweep=false; draw();}};
+$('btnSweep').onclick=()=>{state.sweep=!state.sweep; if(state.sweep)loop();};
+function loop(){if(!state.sweep)return; state.V+=0.03; if(state.V>3)state.V=-3; draw(); requestAnimationFrame(loop);}
+
+init();
+</script>
+</body>
+</html>
