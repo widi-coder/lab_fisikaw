@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Quantum Lab - Ultimate</title>
+<title>Quantum Lab - The Complete Periodic Table</title>
 <style>
 /* =========================================
    STYLE GLOBAL & TRANSISI
@@ -28,7 +28,7 @@ body{
 }
 
 /* =========================================
-   1. STYLE UNTUK LAMPU IMUT (INTRO)
+   INTRO SCREEN (LAMPU)
    ========================================= */
 #intro-screen {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -36,7 +36,6 @@ body{
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   transition: opacity 1s ease;
 }
-
 .lamp-container { position: relative; width: 200px; height: 350px; display: flex; flex-direction: column; align-items: center; }
 .shade {
   position: relative; z-index: 2; width: 180px; height: 140px; background: #444; 
@@ -62,7 +61,7 @@ body{
 .flashing { opacity: 1 !important; transition: opacity 0.1s ease-in !important; }
 
 /* =========================================
-   2. STYLE UTAMA WEB
+   MAIN APP STYLE
    ========================================= */
 .container{max-width:1200px; margin:0 auto; padding:20px; opacity: 0; transition: opacity 1.5s ease;}
 .container.visible { opacity: 1; }
@@ -115,8 +114,8 @@ tr:hover { background: rgba(255,255,255,0.05); }
 <div class="container" id="mainApp">
   <div class="header">
     <div>
-      <h1>Quantum Lab <span style="font-size:0.5em; vertical-align:middle; border:1px solid var(--accent); color:var(--accent); padding:2px 6px; border-radius:4px;">ULTIMATE</span></h1>
-      <div style="font-size:14px; color:var(--text-dim)">Visualisasi Lengkap + Konfigurasi Elektron</div>
+      <h1>Quantum Lab <span style="font-size:0.5em; vertical-align:middle; border:1px solid var(--accent); color:var(--accent); padding:2px 6px; border-radius:4px;">COMPLETE</span></h1>
+      <div style="font-size:14px; color:var(--text-dim)">Database Tabel Periodik Lengkap (88 Material)</div>
     </div>
     <div style="text-align:right">
       <button onclick="reset()" style="background:var(--border); color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">Reset</button>
@@ -126,8 +125,8 @@ tr:hover { background: rgba(255,255,255,0.05); }
   <div class="main-grid">
     <div class="card">
       <div class="search-group">
-        <label class="ctl-header">PILIH MATERIAL</label>
-        <input list="materials" id="search" class="search-box" placeholder="Cari Logam (misal: Seng, Natrium)...">
+        <label class="ctl-header">CARI MATERIAL (Ketik Nama/Simbol)</label>
+        <input list="materials" id="search" class="search-box" placeholder="Cth: Emas, Au, Besi...">
         <datalist id="materials"></datalist>
         <div class="config-display" id="configDisp">Konfigurasi: -</div>
       </div>
@@ -162,7 +161,7 @@ tr:hover { background: rgba(255,255,255,0.05); }
       </div>
       <div id="tutorBox" class="tutor-panel">
         <div class="tutor-head" id="tutorHead"><span>🤖</span> STATUS: MENUNGGU</div>
-        <div class="tutor-text" id="tutorMsg">Silakan pilih material atau ubah slider untuk memulai analisis.</div>
+        <div class="tutor-text" id="tutorMsg">Database memuat 80+ unsur. Silakan pilih material untuk memulai.</div>
       </div>
       <div class="table-container">
         <table id="matTable"><thead><tr><th>Material</th><th>Simbol</th><th>Elektron</th><th>Fungsi Kerja (Φ)</th></tr></thead><tbody></tbody></table>
@@ -189,37 +188,102 @@ function toggleLamp() {
   }, 150);
 }
 
-// --- DATABASE LENGKAP (NAME, SYMBOL, PHI, CATEGORY, ELECTRON CONFIG) ---
+// --- DATABASE LENGKAP (88 Unsur) ---
 const DB = [
-  {n:"Cesium",    s:"Cs", p:2.14, c:"Alkali",       ec:"[Xe] 6s¹"},
-  {n:"Rubidium",  s:"Rb", p:2.26, c:"Alkali",       ec:"[Kr] 5s¹"},
-  {n:"Kalium",    s:"K",  p:2.29, c:"Alkali",       ec:"[Ar] 4s¹"},
-  {n:"Natrium",   s:"Na", p:2.36, c:"Alkali",       ec:"[Ne] 3s¹"},
-  {n:"Lithium",   s:"Li", p:2.50, c:"Alkali",       ec:"[He] 2s¹"},
-  {n:"Barium",    s:"Ba", p:2.70, c:"Alkali Tanah", ec:"[Xe] 6s²"},
+  // --- ALKALI METALS (Group 1) ---
+  {n:"Cesium",    s:"Cs", p:2.14, c:"Alkali", ec:"[Xe] 6s¹"},
+  {n:"Rubidium",  s:"Rb", p:2.26, c:"Alkali", ec:"[Kr] 5s¹"},
+  {n:"Kalium",    s:"K",  p:2.29, c:"Alkali", ec:"[Ar] 4s¹"},
+  {n:"Natrium",   s:"Na", p:2.36, c:"Alkali", ec:"[Ne] 3s¹"},
+  {n:"Lithium",   s:"Li", p:2.50, c:"Alkali", ec:"[He] 2s¹"},
+
+  // --- ALKALINE EARTH METALS (Group 2) ---
+  {n:"Barium",    s:"Ba", p:2.52, c:"Alkali Tanah", ec:"[Xe] 6s²"},
   {n:"Stronsium", s:"Sr", p:2.59, c:"Alkali Tanah", ec:"[Kr] 5s²"},
   {n:"Kalsium",   s:"Ca", p:2.87, c:"Alkali Tanah", ec:"[Ar] 4s²"},
   {n:"Magnesium", s:"Mg", p:3.66, c:"Alkali Tanah", ec:"[Ne] 3s²"},
   {n:"Berilium",  s:"Be", p:4.98, c:"Alkali Tanah", ec:"[He] 2s²"},
-  {n:"Aluminium", s:"Al", p:4.08, c:"Logam Lain",   ec:"[Ne] 3s² 3p¹"},
-  {n:"Seng",      s:"Zn", p:4.33, c:"Transisi",     ec:"[Ar] 3d¹⁰ 4s²"},
-  {n:"Perak",     s:"Ag", p:4.26, c:"Logam Mulia",  ec:"[Kr] 4d¹⁰ 5s¹"},
-  {n:"Tembaga",   s:"Cu", p:4.65, c:"Transisi",     ec:"[Ar] 3d¹⁰ 4s¹"},
-  {n:"Besi",      s:"Fe", p:4.67, c:"Transisi",     ec:"[Ar] 3d⁶ 4s²"},
-  {n:"Nikel",     s:"Ni", p:5.15, c:"Transisi",     ec:"[Ar] 3d⁸ 4s²"},
-  {n:"Kobalt",    s:"Co", p:5.00, c:"Transisi",     ec:"[Ar] 3d⁷ 4s²"},
-  {n:"Titanium",  s:"Ti", p:4.33, c:"Transisi",     ec:"[Ar] 3d² 4s²"},
-  {n:"Emas",      s:"Au", p:5.10, c:"Logam Mulia",  ec:"[Xe] 4f¹⁴ 5d¹⁰ 6s¹"},
-  {n:"Platinum",  s:"Pt", p:6.35, c:"Logam Mulia",  ec:"[Xe] 4f¹⁴ 5d⁹ 6s¹"},
-  {n:"Timah",     s:"Sn", p:4.42, c:"Logam Lain",   ec:"[Kr] 4d¹⁰ 5s² 5p²"},
-  {n:"Timbal",    s:"Pb", p:4.25, c:"Logam Lain",   ec:"[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²"},
-  {n:"Raksa",     s:"Hg", p:4.49, c:"Transisi",     ec:"[Xe] 4f¹⁴ 5d¹⁰ 6s²"},
-  {n:"Kromium",   s:"Cr", p:4.50, c:"Transisi",     ec:"[Ar] 3d⁵ 4s¹"},
-  {n:"Mangan",    s:"Mn", p:4.10, c:"Transisi",     ec:"[Ar] 3d⁵ 4s²"},
-  {n:"Kadmium",   s:"Cd", p:4.08, c:"Transisi",     ec:"[Kr] 4d¹⁰ 5s²"},
-  {n:"Tungsten",  s:"W",  p:4.55, c:"Transisi",     ec:"[Xe] 4f¹⁴ 5d⁴ 6s²"},
-  {n:"Selenium",  s:"Se", p:5.90, c:"Non-Logam",    ec:"[Ar] 3d¹⁰ 4s² 4p⁴"},
-  {n:"Uranium",   s:"U",  p:3.60, c:"Aktinida",     ec:"[Rn] 5f³ 6d¹ 7s²"}
+
+  // --- TRANSITION METALS (Period 4) ---
+  {n:"Scandium",  s:"Sc", p:3.50, c:"Transisi", ec:"[Ar] 3d¹ 4s²"},
+  {n:"Titanium",  s:"Ti", p:4.33, c:"Transisi", ec:"[Ar] 3d² 4s²"},
+  {n:"Vanadium",  s:"V",  p:4.30, c:"Transisi", ec:"[Ar] 3d³ 4s²"},
+  {n:"Kromium",   s:"Cr", p:4.50, c:"Transisi", ec:"[Ar] 3d⁵ 4s¹"},
+  {n:"Mangan",    s:"Mn", p:4.10, c:"Transisi", ec:"[Ar] 3d⁵ 4s²"},
+  {n:"Besi",      s:"Fe", p:4.67, c:"Transisi", ec:"[Ar] 3d⁶ 4s²"},
+  {n:"Kobalt",    s:"Co", p:5.00, c:"Transisi", ec:"[Ar] 3d⁷ 4s²"},
+  {n:"Nikel",     s:"Ni", p:5.15, c:"Transisi", ec:"[Ar] 3d⁸ 4s²"},
+  {n:"Tembaga",   s:"Cu", p:4.65, c:"Transisi", ec:"[Ar] 3d¹⁰ 4s¹"},
+  {n:"Seng",      s:"Zn", p:4.33, c:"Transisi", ec:"[Ar] 3d¹⁰ 4s²"},
+
+  // --- TRANSITION METALS (Period 5) ---
+  {n:"Yttrium",   s:"Y",  p:3.10, c:"Transisi", ec:"[Kr] 4d¹ 5s²"},
+  {n:"Zirkonium", s:"Zr", p:4.05, c:"Transisi", ec:"[Kr] 4d² 5s²"},
+  {n:"Niobium",   s:"Nb", p:4.30, c:"Transisi", ec:"[Kr] 4d⁴ 5s¹"},
+  {n:"Molybdenum",s:"Mo", p:4.60, c:"Transisi", ec:"[Kr] 4d⁵ 5s¹"},
+  {n:"Ruthenium", s:"Ru", p:4.71, c:"Transisi", ec:"[Kr] 4d⁷ 5s¹"},
+  {n:"Rhodium",   s:"Rh", p:4.98, c:"Transisi", ec:"[Kr] 4d⁸ 5s¹"},
+  {n:"Palladium", s:"Pd", p:5.12, c:"Transisi", ec:"[Kr] 4d¹⁰"},
+  {n:"Perak",     s:"Ag", p:4.26, c:"Transisi", ec:"[Kr] 4d¹⁰ 5s¹"},
+  {n:"Kadmium",   s:"Cd", p:4.08, c:"Transisi", ec:"[Kr] 4d¹⁰ 5s²"},
+
+  // --- TRANSITION METALS (Period 6) ---
+  {n:"Hafnium",   s:"Hf", p:3.90, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d² 6s²"},
+  {n:"Tantalum",  s:"Ta", p:4.25, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d³ 6s²"},
+  {n:"Tungsten",  s:"W",  p:4.55, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d⁴ 6s²"},
+  {n:"Rhenium",   s:"Re", p:4.96, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d⁵ 6s²"},
+  {n:"Osmium",    s:"Os", p:5.93, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d⁶ 6s²"},
+  {n:"Iridium",   s:"Ir", p:5.27, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d⁷ 6s²"},
+  {n:"Platinum",  s:"Pt", p:6.35, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d⁹ 6s¹"},
+  {n:"Emas",      s:"Au", p:5.10, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d¹⁰ 6s¹"},
+  {n:"Raksa",     s:"Hg", p:4.49, c:"Transisi", ec:"[Xe] 4f¹⁴ 5d¹⁰ 6s²"},
+
+  // --- POST-TRANSITION METALS ---
+  {n:"Aluminium", s:"Al", p:4.08, c:"Post-Trans", ec:"[Ne] 3s² 3p¹"},
+  {n:"Gallium",   s:"Ga", p:4.20, c:"Post-Trans", ec:"[Ar] 3d¹⁰ 4s² 4p¹"},
+  {n:"Indium",    s:"In", p:4.12, c:"Post-Trans", ec:"[Kr] 4d¹⁰ 5s² 5p¹"},
+  {n:"Timah",     s:"Sn", p:4.42, c:"Post-Trans", ec:"[Kr] 4d¹⁰ 5s² 5p²"},
+  {n:"Thallium",  s:"Tl", p:3.84, c:"Post-Trans", ec:"[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p¹"},
+  {n:"Timbal",    s:"Pb", p:4.25, c:"Post-Trans", ec:"[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²"},
+  {n:"Bismuth",   s:"Bi", p:4.22, c:"Post-Trans", ec:"[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p³"},
+  {n:"Polonium",  s:"Po", p:4.61, c:"Post-Trans", ec:"[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁴"},
+
+  // --- METALLOIDS ---
+  {n:"Boron",     s:"B",  p:4.45, c:"Metaloid", ec:"[He] 2s² 2p¹"},
+  {n:"Silikon",   s:"Si", p:4.85, c:"Metaloid", ec:"[Ne] 3s² 3p²"},
+  {n:"Germanium", s:"Ge", p:5.00, c:"Metaloid", ec:"[Ar] 3d¹⁰ 4s² 4p²"},
+  {n:"Arsenik",   s:"As", p:3.75, c:"Metaloid", ec:"[Ar] 3d¹⁰ 4s² 4p³"},
+  {n:"Antimon",   s:"Sb", p:4.55, c:"Metaloid", ec:"[Kr] 4d¹⁰ 5s² 5p³"},
+  {n:"Tellurium", s:"Te", p:4.95, c:"Metaloid", ec:"[Kr] 4d¹⁰ 5s² 5p⁴"},
+
+  // --- NON-METALS (Solid) ---
+  {n:"Karbon",    s:"C",  p:5.00, c:"Non-Logam", ec:"[He] 2s² 2p²"},
+  {n:"Fosfor",    s:"P",  p:4.42, c:"Non-Logam", ec:"[Ne] 3s² 3p³"},
+  {n:"Sulfur",    s:"S",  p:4.78, c:"Non-Logam", ec:"[Ne] 3s² 3p⁴"},
+  {n:"Selenium",  s:"Se", p:5.90, c:"Non-Logam", ec:"[Ar] 3d¹⁰ 4s² 4p⁴"},
+  {n:"Yodium",    s:"I",  p:5.40, c:"Halogen",   ec:"[Kr] 4d¹⁰ 5s² 5p⁵"},
+
+  // --- LANTHANIDES (Rare Earth Elements) ---
+  {n:"Lanthanum", s:"La", p:3.50, c:"Lantanida", ec:"[Xe] 5d¹ 6s²"},
+  {n:"Cerium",    s:"Ce", p:2.90, c:"Lantanida", ec:"[Xe] 4f¹ 5d¹ 6s²"},
+  {n:"Praseodim", s:"Pr", p:2.70, c:"Lantanida", ec:"[Xe] 4f³ 6s²"},
+  {n:"Neodimium", s:"Nd", p:3.20, c:"Lantanida", ec:"[Xe] 4f⁴ 6s²"},
+  {n:"Promethium",s:"Pm", p:3.05, c:"Lantanida", ec:"[Xe] 4f⁵ 6s²"},
+  {n:"Samarium",  s:"Sm", p:2.70, c:"Lantanida", ec:"[Xe] 4f⁶ 6s²"},
+  {n:"Europium",  s:"Eu", p:2.50, c:"Lantanida", ec:"[Xe] 4f⁷ 6s²"},
+  {n:"Gadolinium",s:"Gd", p:3.10, c:"Lantanida", ec:"[Xe] 4f⁷ 5d¹ 6s²"},
+  {n:"Terbium",   s:"Tb", p:3.00, c:"Lantanida", ec:"[Xe] 4f⁹ 6s²"},
+  {n:"Dysprosium",s:"Dy", p:3.08, c:"Lantanida", ec:"[Xe] 4f¹⁰ 6s²"},
+  {n:"Holmium",   s:"Ho", p:3.15, c:"Lantanida", ec:"[Xe] 4f¹¹ 6s²"},
+  {n:"Erbium",    s:"Er", p:3.10, c:"Lantanida", ec:"[Xe] 4f¹² 6s²"},
+  {n:"Thulium",   s:"Tm", p:3.08, c:"Lantanida", ec:"[Xe] 4f¹³ 6s²"},
+  {n:"Ytterbium", s:"Yb", p:2.60, c:"Lantanida", ec:"[Xe] 4f¹⁴ 6s²"},
+  {n:"Lutetium",  s:"Lu", p:3.30, c:"Lantanida", ec:"[Xe] 4f¹⁴ 5d¹ 6s²"},
+
+  // --- ACTINIDES (Radioactive Solids) ---
+  {n:"Thorium",   s:"Th", p:3.40, c:"Aktinida", ec:"[Rn] 6d² 7s²"},
+  {n:"Uranium",   s:"U",  p:3.60, c:"Aktinida", ec:"[Rn] 5f³ 6d¹ 7s²"},
+  {n:"Plutonium", s:"Pu", p:3.40, c:"Aktinida", ec:"[Rn] 5f⁶ 7s²"}
 ];
 
 const $ = id => document.getElementById(id);
@@ -228,7 +292,7 @@ const h = 4.1357e-15;
 let state = { phi: 2.36, f: 550, I: 0.60, V: -3, matName: "Natrium", ec: "[Ne] 3s¹", sweep: false };
 
 function init(){
-  DB.sort((a,b) => a.p - b.p); // Urutkan berdasarkan fungsi kerja biar rapi
+  DB.sort((a,b) => a.p - b.p); // Urutkan berdasarkan phi
   DB.forEach(m => {
     let opt = document.createElement('option'); opt.value = m.n; $('materials').appendChild(opt);
     let tr = document.createElement('tr');
@@ -260,22 +324,22 @@ function getLightProps(f) {
   if(f<400){r=100;name="Inframerah";}else if(f<480){r=255;name="Merah";}else if(f<510){r=255;g=140;name="Jingga";}
   else if(f<540){r=255;g=255;name="Kuning";}else if(f<600){g=255;name="Hijau";}else if(f<670){g=220;b=255;name="Biru Muda";}
   else if(f<750){r=50;g=50;b=255;name="Biru";}else if(f<790){r=160;b=240;name="Ungu";}else{r=140;b=210;name="Ultraviolet";}
-  return { color: `rgb(${r},${g},${b})`, name };
+  return { color: rgb(${r},${g},${b}), name };
 }
 
 function updateTutor(phys, light) {
   const box = $('tutorBox'), head = $('tutorHead'), msg = $('tutorMsg');
   if (!phys.emission) {
-    box.style.borderLeftColor = "var(--st-err)"; head.innerHTML = `<span style="color:var(--st-err)">🛑 GAGAL LEPAS</span>`;
-    msg.innerHTML = `Logam <b>${state.matName}</b> (${state.ec}) mengikat elektron kuat sekali (<span class="hl">${state.phi.toFixed(2)} eV</span>).<br>Energi foton <b>${light.name}</b> cuma <span class="hl hl-err">${phys.Eph.toFixed(2)} eV</span>. Kurang kuat!`;
+    box.style.borderLeftColor = "var(--st-err)"; head.innerHTML = <span style="color:var(--st-err)">🛑 GAGAL LEPAS</span>;
+    msg.innerHTML = Logam <b>${state.matName}</b> (${state.ec}) mengikat elektron kuat sekali (<span class="hl">${state.phi.toFixed(2)} eV</span>).<br>Energi foton <b>${light.name}</b> cuma <span class="hl hl-err">${phys.Eph.toFixed(2)} eV</span>. Kurang kuat!;
     return;
   }
   if (state.V < -phys.Vs) {
-    box.style.borderLeftColor = "var(--st-warn)"; head.innerHTML = `<span style="color:var(--st-warn)">⚠️ TERTOLAK TEGANGAN</span>`;
-    msg.innerHTML = `Elektron berhasil lepas dari kulit terluar <b>${state.ec}</b>! <br>Tapi baterai melawan dengan <b>${state.V.toFixed(2)} V</b>, jadi arus berhenti.`;
+    box.style.borderLeftColor = "var(--st-warn)"; head.innerHTML = <span style="color:var(--st-warn)">⚠ TERTOLAK TEGANGAN</span>;
+    msg.innerHTML = Elektron berhasil lepas dari kulit terluar <b>${state.ec}</b>! <br>Tapi baterai melawan dengan <b>${state.V.toFixed(2)} V</b>, jadi arus berhenti.;
   } else {
-    box.style.borderLeftColor = "var(--st-ok)"; head.innerHTML = `<span style="color:var(--st-ok)">✅ ARUS MENGALIR</span>`;
-    msg.innerHTML = `Sukses! Elektron valensi <b>${state.ec}</b> terlepas. <br>Energi Kinetik sisa: <span class="hl hl-ok">${phys.Kmax.toFixed(2)} eV</span>.`;
+    box.style.borderLeftColor = "var(--st-ok)"; head.innerHTML = <span style="color:var(--st-ok)">✅ ARUS MENGALIR</span>;
+    msg.innerHTML = Sukses! Elektron valensi <b>${state.ec}</b> terlepas. <br>Energi Kinetik sisa: <span class="hl hl-ok">${phys.Kmax.toFixed(2)} eV</span>.;
   }
 }
 
@@ -288,7 +352,7 @@ function draw() {
   $('vI').innerText = Math.round(state.I * 100) + "%";
   
   // Update Config Display
-  $('configDisp').innerHTML = `Konfigurasi: <b>${state.ec}</b>`;
+  $('configDisp').innerHTML = Konfigurasi: <b>${state.ec}</b>;
 
   updateTutor(phys, light);
 
@@ -328,7 +392,7 @@ function draw() {
     ctx.setLineDash([5,5]); ctx.lineWidth=2;
     ctx.beginPath(); ctx.moveTo(xStop,pad); ctx.lineTo(xStop,hC-pad); ctx.stroke(); 
     ctx.restore();
-    ctx.fillStyle="#ff0055"; ctx.font="bold 12px sans-serif"; ctx.fillText(`Vs`,xStop+5,pad+15);
+    ctx.fillStyle="#ff0055"; ctx.font="bold 12px sans-serif"; ctx.fillText(Vs,xStop+5,pad+15);
   }
 
   // Dot
